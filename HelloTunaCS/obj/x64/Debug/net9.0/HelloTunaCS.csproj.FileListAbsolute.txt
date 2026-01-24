@@ -1,0 +1,14 @@
+C:\Users\zimin\8002 Doodles\HelloTunaCS\bin\x64\Debug\net9.0\HelloTunaCS.exe
+C:\Users\zimin\8002 Doodles\HelloTunaCS\bin\x64\Debug\net9.0\HelloTunaCS.deps.json
+C:\Users\zimin\8002 Doodles\HelloTunaCS\bin\x64\Debug\net9.0\HelloTunaCS.runtimeconfig.json
+C:\Users\zimin\8002 Doodles\HelloTunaCS\bin\x64\Debug\net9.0\HelloTunaCS.dll
+C:\Users\zimin\8002 Doodles\HelloTunaCS\bin\x64\Debug\net9.0\HelloTunaCS.pdb
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.AssemblyInfoInputs.cache
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.AssemblyInfo.cs
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.csproj.CoreCompileInputs.cache
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.dll
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\refint\HelloTunaCS.dll
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.pdb
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\HelloTunaCS.genruntimeconfig.cache
+C:\Users\zimin\8002 Doodles\HelloTunaCS\obj\x64\Debug\net9.0\ref\HelloTunaCS.dll
