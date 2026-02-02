@@ -3,39 +3,25 @@ Author: Ziming Zhao
 Brave new world towards the defense industries.
 Sources: now done in IEEE style in the source code! :)
 
-/*
-Author: Ziming Zhao
-Brave new world towards the defense industries.
-Sources: now done in IEEE style in the source code! :)
-
-[1] W3Schools, “C user input,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_user_input.php
-. [Accessed: Jan. 2026].
-
-[2] W3Schools, “C structures,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_structs.php
-. [Accessed: Jan. 2026].
-
-[3] W3Schools, “C function pointers,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_functions_pointers.php
-. [Accessed: Jan. 2026].
-
-https://www.w3schools.com/c/c_arrays.php
-
-https://www.w3schools.com/c/c_arrays_loop.php
-
+Nothing really new to reference here.
 */
 
+
+
 #include <stdio.h>
-#include "../Src/Interface.h" //all files centalized into one interface file, because there isn't private or public ways to hide stuff and localize in C
+#include "../src/Interface.h"
+
+static void runMenu(void);
 
 int main(void) {
     runMenu();
     return 0;
 }
 
-
-/* 
+/*
     Displays the menu and processes user choices, just adapted it slightly from PA2
     Parameters: none
-    Returns: maybe the entire csv, if nothing goes wrong.
+    Returns: nothing
 */
 static void runMenu(void) {
     int choice = 0;
@@ -66,6 +52,3 @@ static void runMenu(void) {
         }
     } while (choice != 2);
 }
-
-
-

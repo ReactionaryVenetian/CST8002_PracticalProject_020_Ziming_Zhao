@@ -35,6 +35,7 @@ Sources:
 
 
 #include "Interface.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -56,16 +57,15 @@ void clear_input_line(void) {
 }
 
 /*
-    Removes trailing newline and carriage return characters
-    from a string read using fgets.
+    Sometimes people use enter for menu inputs, this trims newlines from strings (/,).
 
     Parameters:
         s - pointer to a null-terminated character array
     Returns: nothing
 */
 static void trim_newline(char *s) {
-    size_t n = strlen(s);
-    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r')) {
+    size_t n = strlen(s); //strlen returns length of string s (input)
+    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r')) { //trim \n and \r from end of string (windows line endings? they're a thing)
         s[n - 1] = '\0';
         n--;
     }
@@ -141,7 +141,7 @@ static void printDatabaseDTO(const DatabaseDTO *dto) {
 */
 void do_read_file(void) {
     DatabaseDTO dto = {0, 0, NULL};
-    FILE *fp = fopen("App/pacific_rim_npr_coa.csv", "r");
+    FILE *fp = fopen("PP1/App/pacific_rim_npr_coastalmarine_black_oystercatcher_population_nesting_counts_2008-2017_data.csv", "r");
     char line[LINE_BUF];
 
     if (fp == NULL) {
