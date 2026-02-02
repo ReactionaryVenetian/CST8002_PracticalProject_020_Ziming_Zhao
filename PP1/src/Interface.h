@@ -2,15 +2,8 @@
 Author: Ziming Zhao
 Brave new world towards the defense industries.
 Sources:
-[1] W3Schools, “C files write,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_files_write.php
-. [Accessed: Jan. 2026].
-
-[2] W3Schools, “C files read,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_files_read.php
-. [Accessed: Jan. 2026].
-*/
 
 /* this is the interface that lets the main know what's where*/ 
-
 
 // ifndef INTERFACE_H, checks if INTERFACE_H is loaded to prevent multiple inclusions, which can cause errors I think
 // if it is defined, it skips to the end at #endif
@@ -18,35 +11,23 @@ Sources:
 // ifndef returns false(0), then we load all the code between it and #endif 
 #define INTERFACE_H
 
-#include <stddef.h>
 
-/*
-    Returns 1 if filename is "safe" (no folder separators) and can be used
-    in the startup folder. Returns 0 otherwise.
- */
-int is_safe_startup_filename(const char *filename);
+/* 
+    My DTO, a simple struct to hold database data in memory.    
+    It has three fields: number of columns, number of rows, and a 3D array of strings for the values.
+*/
+typedef struct {
+    int columns;
+    int rows;   // number of rows in the database entry, int type will be an issue for larger datasets
+    char ***values;  // number of values per row, dynamically allocated array, * is for level of memory, so the first level is just the pointer,    
+    //the second level is the array of pointers to each row, the third level is the char string for each column in that row.
 
-/*
-    Copies input into out, ensuring it ends with ".txt".
-    If input already ends with ".txt", it is copied as-is.
-    If not, ".txt" is appended (as long as it fits).
- */
-void normalize_txt_filename(const char *input, char *out, size_t out_size);
+} DatabaseDTO; //data transfer object for database entries, dynamically sized depending on input data.
 
-/* Returns 1 if the file exists, 0 if it does not exist. */
-int file_exists(const char *filename);
+/* Input helpers */
+void clear_input_line(void);
 
-/*
-    Reads a text file into buffer (null-terminated).
-    Returns 0 on success, nonzero on failure.
- */
-int read_text_file(const char *filename, char *buffer, size_t buffer_size);
-
-/*
-    Writes text to filename.
-    If overwrite == 0 and the file already exists, returns 2 (special code).
-    Returns 0 on success, nonzero on failure.
- */
-int write_text_file(const char *filename, const char *text, int overwrite);
+/* Main menu action */
+void do_read_file(void);
 
 #endif

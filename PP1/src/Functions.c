@@ -13,191 +13,172 @@ Sources:
 
 [4] W3Schools, “C files read,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_files_read.php
 . [Accessed: Jan. 2026].
-*/
 
-#include "Interface.h"
-#include <stdio.h>
-#include <string.h>
+[5] W3Schools, “C memory reallocation (realloc),” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_memory_reallocate.php
+. [Accessed: Jan. 2026].
+
+[6] Codecademy, “C operators — sizeof,” Codecademy Documentation. [Online]. Available: https://www.codecademy.com/resources/docs/c/operators/sizeof
+. [Accessed: Jan. 2026].
+
+[7] W3Schools, “C structs and padding,” W3Schools Online Web Tutorials. [Online]. Available: https://www.w3schools.com/c/c_structs_padding.php
+. [Accessed: Jan. 2026].
+
+[8] W3Schools, “C stdio fgets() Function”. [Online]. Available: https://www.w3schools.com/c/ref_stdio_fgets.php
+. [Accessed: Jan. 2026].
+
+*/
 
 
 /* this is the functions lists does stuff when called upon*/ 
 
 
+
+
 #include "Interface.h"
-#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#define LINE_BUF 4096
+#define MAX_ROWS 5   /* load only first few rows for Phase 1 */
 
-/* Checks if the person entered anything 
-    Parameters: filename - to check
-    Returns: 1 if safe, 0 otherwise
+/*
+    Clears remaining characters from the input buffer (waiting in stdin).
+    Used to prevent invalid input from affecting subsequent reads in the menu.
+
+    Parameters: none
+    Returns: nothing
 */
-
-int is_safe_startup_filename(const char *filename) {
-    size_t len;
-
-    if (filename == NULL) return 0;
-
-    len = strlen(filename); 
-    if (len == 0) return 0;
-
-    /* Checks if the filename contains any path separators with a loop for each char up to length, so that: 
-    "The program will only write to or read from files within the folder or directory the program
-    started up from within."*/
-    for (size_t i = 0; i < len; i++) {
-        if (filename[i] == '/' || filename[i] == '\\') return 0;
+void clear_input_line(void) {
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF) { //getchar reads next char from stdin, stores it in c, and discards it
+        /* discard */
     }
-
-    /* Returns 1 if the filename is safe (no path separators) */
-    return 1;
 }
 
-/* Ensures the filename ends with ".txt"
-   Parameters: 
-     input    - what the user typed
-     out      - buffer where final filename is stored
-     out_size - size of output buffer
-   Returns: nothing (void)
+/*
+    Removes trailing newline and carriage return characters
+    from a string read using fgets.
+
+    Parameters:
+        s - pointer to a null-terminated character array
+    Returns: nothing
 */
-void normalize_txt_filename(const char *input, char *out, size_t out_size) {
-    size_t in_len;
+static void trim_newline(char *s) {
+    size_t n = strlen(s);
+    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r')) {
+        s[n - 1] = '\0';
+        n--;
+    }
+}
 
-    /* If output buffer is invalid, do nothing */
-    if (out == NULL || out_size == 0) return;
+/*
+    Counts the number of columns in a CSV header line by
+    counting comma delimiters.
 
-    /* Initialize output as empty string */
-    out[0] = '\0';
+    Parameters:
+        line - CSV header line
+    Returns:
+        Number of detected columns
+*/
+static int count_columns(const char *line) {
+    int cols = 1;
+    for (const char *p = line; *p; p++) {
+        if (*p == ',') {
+            cols++;
+        }
+    }
+    return cols;
+}
 
-    /* If input is invalid, stop */
-    if (input == NULL) return;
+/*
+    Frees all dynamically allocated memory associated with
+    a DatabaseDTO and resets its fields.
 
-    /* Get length of user input */
-    in_len = strlen(input);
+    Parameters:
+        dto - pointer to DatabaseDTO to be freed
+    Returns: nothing
+*/
+static void freeDatabaseDTO(DatabaseDTO *dto) {
+    for (int i = 0; i < dto->rows; i++) {
+        for (int j = 0; j < dto->columns; j++) {
+            free(dto->values[i][j]);
+        }
+        free(dto->values[i]);
+    }
+    free(dto->values);
 
-    /* If filename already ends with ".txt", copy as-is */
-    if (in_len >= 4 && strcmp(input + (in_len - 4), ".txt") == 0) {
-        strncpy(out, input, out_size - 1);
-        out[out_size - 1] = '\0';
+    dto->rows = 0;
+    dto->columns = 0;
+    dto->values = NULL;
+}
+
+/*
+    Outputs the contents of the DatabaseDTO to the screen
+    by looping over rows and columns.
+
+    Parameters:
+        dto - pointer to DatabaseDTO containing loaded data
+    Returns: nothing
+*/
+static void printDatabaseDTO(const DatabaseDTO *dto) {
+    printf("\nLoaded %d rows x %d columns\n\n", dto->rows, dto->columns);
+
+    for (int r = 0; r < dto->rows; r++) {
+        printf("Row %d:\n", r + 1);
+        for (int c = 0; c < dto->columns; c++) {
+            printf("  %s\n", dto->values[r][c]);
+        }
+        printf("\n");
+    }
+}
+
+/*
+    Opens the CSV data file, dynamically reads the first
+    few records into a DatabaseDTO, and displays the data.
+
+    Parameters: none
+    Returns: nothing
+*/
+void do_read_file(void) {
+    DatabaseDTO dto = {0, 0, NULL};
+    FILE *fp = fopen("App/pacific_rim_npr_coa.csv", "r");
+    char line[LINE_BUF];
+
+    if (fp == NULL) {
+        printf("Could not open CSV file.\n\n");
         return;
     }
 
-    /* Otherwise, append ".txt" if it fits in buffer */
-    if (in_len + 4 < out_size) {
-        strcpy(out, input);
-        strcat(out, ".txt");
-    } else {
-        /* If not enough space, copy as much as possible safely */
-        strncpy(out, input, out_size - 1);
-        out[out_size - 1] = '\0';
-    }
-}
+    /* Read header to determine column count */
+    fgets(line, sizeof(line), fp);
+    dto.columns = count_columns(line);
 
-/* Checks if a file already exists
-   Parameters: filename - file to check
-   Returns: 1 if file exists, 0 if not
-*/
-int file_exists(const char *filename) {
-    FILE *fp;
+    /* Read rows dynamically 
+    allocate array of pointers for spacing, not value!
+    sizeof indicates the memory size of what is being pointed to (the dto's values in dto.values), so we multiply by number of rows. It is a lot leaner this way
+    compared to Java using object headers + alignment that takes up more memory. Especially for array of objects each with their own object header + alignment.
+    Uhhhh... Better summed up as  “Give me space for rows number of row pointers.”
+   
+    */
+    while (dto.rows < MAX_ROWS && fgets(line, sizeof(line), fp)) {
+        trim_newline(line);
 
-    /* If filename is invalid, treat as not existing */
-    if (filename == NULL) return 0;
+        dto.rows++;
+        dto.values = realloc(dto.values, dto.rows * sizeof *dto.values);
+        dto.values[dto.rows - 1] =
+            malloc(dto.columns * sizeof *dto.values[dto.rows - 1]);
 
-    /* Try opening file for reading */
-    fp = fopen(filename, "r");
-    if (fp == NULL) return 0;
+        char *saveptr = NULL;
+        char *token = strtok_r(line, ",", &saveptr);
 
-    /* File opened successfully, so it exists */
-    fclose(fp);
-    return 1;
-}
-
-/* Reads an entire text file into a buffer
-   Parameters:
-     filename     - name of file to read
-     buffer       - where file contents are stored
-     buffer_size  - size of buffer
-   Returns: 0 on success, non-zero on failure
-*/
-int read_text_file(const char *filename, char *buffer, size_t buffer_size) {
-    FILE *fp;
-    size_t total = 0;
-
-    /* Validate parameters */
-    if (filename == NULL || buffer == NULL || buffer_size == 0) return 1;
-
-    /* Enforce startup-folder-only rule */
-    if (!is_safe_startup_filename(filename)) return 2;
-
-    /* Open file for reading */
-    fp = fopen(filename, "r");
-    if (fp == NULL) return 3;
-
-    /* Start with empty buffer */
-    buffer[0] = '\0';
-
-    /* Read until end of file */
-    while (!feof(fp)) {
-        size_t space_left = (buffer_size - 1) - total;
-        size_t n;
-
-        /* Prevent buffer overflow */
-        if (space_left == 0) {
-            fclose(fp);
-            return 4;
+        for (int c = 0; c < dto.columns; c++) {
+            dto.values[dto.rows - 1][c] = strdup(token ? token : "");
+            token = strtok_r(NULL, ",", &saveptr);
         }
-
-        /* Read next chunk */
-        n = fread(buffer + total, 1, space_left, fp);
-        if (ferror(fp)) {
-            fclose(fp);
-            return 5;
-        }
-
-        total += n;
-    }
-
-    /* Null-terminate final string */
-    buffer[total] = '\0';
-
-    fclose(fp);
-    return 0;
-}
-
-/* Writes text to a file
-   Parameters:
-     filename  - file to write to
-     text      - text to write
-     overwrite - 1 to allow overwrite, 0 to block overwrite
-   Returns:
-     0 on success
-     2 if file exists and overwrite not allowed
-     non-zero on other failure
-*/
-int write_text_file(const char *filename, const char *text, int overwrite) {
-    FILE *fp;
-
-    /* Validate parameters */
-    if (filename == NULL || text == NULL) return 1;
-
-    /* Enforce startup-folder-only rule */
-    if (!is_safe_startup_filename(filename)) return 2;
-
-    /* If overwrite not allowed and file exists, block write */
-    if (!overwrite && file_exists(filename)) {
-        return 2;
-    }
-
-    /* Open file for writing (overwrite) */
-    fp = fopen(filename, "w");
-    if (fp == NULL) return 3;
-
-    /* Write text to file, hey look EOF from cobol notations */
-    if (fputs(text, fp) == EOF) {
-        fclose(fp);
-        return 4;
     }
 
     fclose(fp);
-    return 0;
-}
 
+    printDatabaseDTO(&dto);
+    freeDatabaseDTO(&dto);
+}
