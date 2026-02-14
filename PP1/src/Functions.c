@@ -29,7 +29,7 @@ Sources:
 */
 
 
-/* this is the functions lists does stuff when called upon*/ 
+// this is the functions lists does stuff when called upon
 
 
 
@@ -96,6 +96,7 @@ static int count_columns(const char *line) {
 
     Parameters:
         dto - pointer to DatabaseDTO to be freed
+        Cycles through rows and columns to free each string, then frees row pointers and finally the main values pointer.
     Returns: nothing
 */
 static void freeDatabaseDTO(DatabaseDTO *dto) {

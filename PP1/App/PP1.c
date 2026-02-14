@@ -6,7 +6,7 @@ Sources: now done in IEEE style in the source code! :)
 Nothing really new to reference here.
 */
 
-
+// this is the main that runs the menu and calls other functions
 
 #include <stdio.h>
 #include "../src/Interface.h"
