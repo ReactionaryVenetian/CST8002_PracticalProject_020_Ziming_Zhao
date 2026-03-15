@@ -15,6 +15,11 @@
  * the CsvRepository module. My name is included cause I'm vain.
  * 
  * References: 
+ * [1] Stack Overflow, "Generating a random UUID in C," Stack Overflow, 2018. 
+ * [Online]. Available: https://stackoverflow.com/questions/51053568/generating-a-random-uuid-in-c
+ * [Accessed: Feb. 22, 2026]. Welp, I needed a UUID generator for the save function, 
+ * and this was the best C implementation I could find. I adapted it to fit my needs and included it in the Misc utility module.
+ * 
  */
 
 #include "Records.h"
@@ -22,7 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../persistence/CsvRepository.h" //not done yet, but will be used for file I/O
+#include "../persistance/CsvRepository.h" //lol, I misspelled persistance 
 #include "../util/Misc.h"
 #include "../util/Input.h"
 

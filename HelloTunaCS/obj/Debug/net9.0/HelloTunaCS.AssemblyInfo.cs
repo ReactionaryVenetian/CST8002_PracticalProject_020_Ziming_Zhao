@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HelloTunaCS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1485cb96e30be89f8b8ad47892cffcbf5d38bceb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+85b54eb7ea0134bbd342bb8a683b1e0f1e60060e")]
 [assembly: System.Reflection.AssemblyProductAttribute("HelloTunaCS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HelloTunaCS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
