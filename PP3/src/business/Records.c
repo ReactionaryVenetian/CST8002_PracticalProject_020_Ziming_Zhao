@@ -12,8 +12,9 @@
  *
  * Description:
  * This module maintains an in-memory sequential data structure
- * and performs CRUD operations. Persistence is delegated to
- * the CsvRepository module. My name is included cause I'm vain.
+ * and performs CRUD operations and now apparently statistical analysis.
+ * Persistence is delegated to the CsvRepository module. My name is
+ * included cause I'm vain.
  * 
  * New References: 
  * [1]GeeksforGeeks, “qsort() Function in C,” GeeksforGeeks, Apr. 14, 2024. 
@@ -21,7 +22,8 @@
  * [Accessed: Mar. 29, 2026]. Welp, turns out there's not many built in algorithms 
  * for in C, so I guess I'll write my own. 
  * 
- * [2]“C Math,” www.w3schools.com. https://www.w3schools.com/c/c_math.php
+ * [2]w3schools “C Math,” www.w3schools.com, unknown update.
+ *  https://www.w3schools.com/c/c_math.php
 ‌ * [Accessed: Mar. 29, 2026]. Here's to me remembering simple statistical things. 
  * 
  */
@@ -523,9 +525,14 @@ void records_display_analysis(void) {
 }
 
 /**
- * todo
+ * @brief Displays records with adults greater than or equal to a threshold.
+ *
+ * Performs a linear search through all records in memory and prints
+ * only those where the Total Black oystercatcher adults value meets
+ * or exceeds the specified threshold.
+ *
+ * @param threshold Minimum number of adults to filter records.
  */
-
 void records_search_by_min_adults(int threshold) {
     for (size_t i = 0; i < g_count; i++) {
         if (g_records[i].total_black_oystercatcher_adults >= threshold) {
@@ -540,7 +547,12 @@ void records_search_by_min_adults(int threshold) {
 }
 
 /**
- * todo
+ * @brief Counts how many records match a given species.
+ *
+ * Performs a linear scan of all records and compares the species field
+ * using strcmp(). Only exact matches are counted.
+ *
+ * @param species Species name to search for.
  */
 void records_count_species(const char *species) {
     int count = 0;
@@ -555,7 +567,13 @@ void records_count_species(const char *species) {
 }
 
 /**
- * todo
+ * @brief Calculates the standard deviation of adult counts.
+ *
+ * Computes the standard deviation of Total Black oystercatcher adults
+ * across all records by first calculating the average and then summing
+ * the squared differences from that average.
+ *
+ * @return double Standard deviation value, or 0.0 if no records exist.
  */
 double records_stddev(void) {
     double avg = records_average_adults();
