@@ -1,16 +1,19 @@
 /**
+ * @file CsvRepository.c
+ * @brief Implements CSV reading and writing for Record objects.
+ *
  * CST8002 Programming Language Research Project
- * Practical Project Part 02 – Project Review I
+ * Practical Project Part 03 – Algorithmic manipulation of Structs
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-02-22
+ * Due Date: 2026-03-29
  *
  * Description:
- * Implements CSV reading and writing for Record objects.
- * Reads line-by-line using fgets, skips a header row, and parses 4 columns:
- * Visit date, Site identification, Species, Total Black oystercatcher adults.
- * Writes CSV output with a header row.
+ * This module provides persistence operations for Record objects using
+ * CSV file input and output. It reads records line-by-line using fgets(),
+ * skips the header row, parses four expected columns, and writes records
+ * back to CSV format with a header row.
  *
  * References:
  * [1] cppreference.com, "fopen," C standard library reference.
@@ -42,12 +45,15 @@
 
 #define LINE_BUF 4096
 
-/* ---- local helpers ---- */
+/* ---- Local helper functions ---- */
 
 /**
- * Trims trailing newline characters from a string.
+ * @brief Removes trailing newline and carriage return characters from a string.
  *
- * @param s String to trim.
+ * This function trims '\n' and '\r' characters from the end of a
+ * null-terminated C string.
+ *
+ * @param s Pointer to the string to trim.
  */
 static void trim_newline(char *s) {
     size_t n = strlen(s);
@@ -58,48 +64,62 @@ static void trim_newline(char *s) {
 }
 
 /**
- * Checks if a line looks like the dataset header.
+ * @brief Determines whether a CSV line appears to be the dataset header.
  *
- * @param line CSV line.
- * @return 1 if header, 0 otherwise.
+ * Checks for the expected dataset column names within the given line.
+ *
+ * @param line Pointer to the CSV line to inspect.
+ * @return int Returns 1 if the line appears to be a header row, otherwise 0.
  */
 static int is_header_line(const char *line) {
     if (line == NULL) return 0;
-    /* Very simple check based on known column names */
+
     return (strstr(line, "Visit date") != NULL) &&
            (strstr(line, "Site identification") != NULL) &&
            (strstr(line, "Species") != NULL);
 }
 
 /**
- * Copies a source C-string safely into a destination buffer.
+ * @brief Safely copies a source string into a destination buffer.
  *
- * @param dst Destination buffer.
- * @param dst_size Destination buffer size.
- * @param src Source string (may be NULL).
+ * Copies up to dst_size - 1 characters from the source string into the
+ * destination buffer and ensures null termination.
+ *
+ * @param dst Pointer to the destination buffer.
+ * @param dst_size Size of the destination buffer.
+ * @param src Pointer to the source string. May be NULL.
  */
 static void copy_field(char *dst, size_t dst_size, const char *src) {
     if (dst == NULL || dst_size == 0) return;
+
     if (src == NULL) {
         dst[0] = '\0';
         return;
     }
+
     strncpy(dst, src, dst_size - 1);
     dst[dst_size - 1] = '\0';
 }
 
 /**
- * Parses one CSV data line into a Record.
- * Assumes 4 columns separated by commas, no quoted commas.
+ * @brief Parses a single CSV data line into a Record object.
  *
- * @param line CSV line (will be modified).
- * @param out_record Output Record.
- * @return 0 on success, non-zero on parse failure.
+ * This function splits a writable CSV line into four expected fields:
+ * Visit date, Site identification, Species, and
+ * Total Black oystercatcher adults.
+ *
+ * The function assumes:
+ * - fields are separated by commas
+ * - the input line may be modified
+ * - quoted commas are not supported
+ *
+ * @param line Pointer to the writable CSV line buffer.
+ * @param out_record Pointer to the Record structure to populate.
+ * @return int Returns 0 on success, or non-zero on parse failure.
  */
 static int parse_record_line(char *line, Record *out_record) {
     if (line == NULL || out_record == NULL) return 1;
 
-    /* Split into 4 tokens */
     char *tokens[4] = {0};
     int t = 0;
 
@@ -113,18 +133,13 @@ static int parse_record_line(char *line, Record *out_record) {
     }
 
     if (t < 4) {
-        /* Not enough columns */
         return 2;
     }
-
-    /* There might still be commas in the last field if CSV has extra columns (shouldn't here).
-       We accept only the first 4 columns. */
 
     copy_field(out_record->visit_date, sizeof(out_record->visit_date), tokens[0]);
     copy_field(out_record->site_identification, sizeof(out_record->site_identification), tokens[1]);
     copy_field(out_record->species, sizeof(out_record->species), tokens[2]);
 
-    /* Parse int field (trim spaces) */
     {
         char *s = tokens[3];
         while (*s && isspace((unsigned char)*s)) s++;
@@ -135,25 +150,47 @@ static int parse_record_line(char *line, Record *out_record) {
 }
 
 /**
- * Ensures the output directory exists when saving to "output/...".
+ * @brief Ensures that the output directory exists before saving a file.
  *
- * @param path Output path.
+ * This function handles the common assignment case of saving files to
+ * an "output" directory. If the directory already exists, the attempt
+ * to create it is ignored.
+ *
+ * @param path Path of the output file being saved.
  */
 static void ensure_output_dir(const char *path) {
     if (path == NULL) return;
 
-    /* only handle the common assignment case */
     if (strncmp(path, "output/", 7) == 0 || strncmp(path, "output\\", 7) == 0) {
 #ifdef _WIN32
-        _mkdir("output"); /* returns -1 if exists; ok */
+        _mkdir("output");
 #else
-        mkdir("output", 0777); /* returns -1 if exists; ok */
+        mkdir("output", 0777);
 #endif
     }
 }
 
-/* ---- public functions ---- */
+/* ---- Public functions ---- */
 
+/**
+ * @brief Loads up to n records from a CSV file into an output array.
+ *
+ * This function opens the specified CSV file, skips the header row,
+ * parses each data line into a Record object, and stores the results
+ * in the provided output array.
+ *
+ * The number of records loaded is limited by:
+ * - n
+ * - max_out
+ * - the number of valid rows in the file
+ *
+ * @param path Path to the CSV file to read.
+ * @param out Pointer to the output Record array.
+ * @param max_out Maximum capacity of the output array.
+ * @param n Maximum number of records to load.
+ * @param out_count Pointer to store the actual number of records loaded.
+ * @return int Returns 0 on success, or non-zero on error.
+ */
 int csv_load_first_n(const char *path,
                      Record *out,
                      size_t max_out,
@@ -173,26 +210,22 @@ int csv_load_first_n(const char *path,
 
     fp = fopen(path, "r");
     if (fp == NULL) {
-        return 2; /* file missing / cannot open */
+        return 2;
     }
 
     while (fgets(line, sizeof(line), fp) != NULL) {
         trim_newline(line);
 
-        /* Skip empty lines */
         if (line[0] == '\0') {
             continue;
         }
 
-        /* Skip header (either first line if it matches, or first non-empty line) */
         if (!header_skipped) {
             if (is_header_line(line)) {
                 header_skipped = 1;
                 continue;
             }
-            /* If it doesn't look like a header, still treat the first line as header per dataset note */
             header_skipped = 1;
-            /* If you want to treat first line as data when no header, comment the next continue out. */
             continue;
         }
 
@@ -202,11 +235,9 @@ int csv_load_first_n(const char *path,
 
         record_init(&out[count]);
 
-        /* parse modifies the line, so pass a writable buffer */
         if (parse_record_line(line, &out[count]) == 0) {
             count++;
         } else {
-            /* skip bad line */
             continue;
         }
     }
@@ -219,6 +250,17 @@ int csv_load_first_n(const char *path,
     return 0;
 }
 
+/**
+ * @brief Saves all records to a CSV file.
+ *
+ * This function writes a header row followed by all records from the
+ * provided Record array into the specified CSV file.
+ *
+ * @param path Path to the CSV file to create.
+ * @param records Pointer to the array of Record objects to save.
+ * @param count Number of records to write.
+ * @return int Returns 0 on success, or non-zero on error.
+ */
 int csv_save_all(const char *path, const Record *records, size_t count) {
     FILE *fp;
 
@@ -233,11 +275,9 @@ int csv_save_all(const char *path, const Record *records, size_t count) {
         return 2;
     }
 
-    /* header row */
     fprintf(fp, "Visit date,Site identification,Species,Total Black oystercatcher adults\n");
 
     for (size_t i = 0; i < count; i++) {
-        /* No quoting/escaping implemented (dataset and your inputs should avoid commas). */
         fprintf(fp, "%s,%s,%s,%d\n",
                 records[i].visit_date,
                 records[i].site_identification,

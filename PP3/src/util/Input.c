@@ -1,16 +1,24 @@
 /**
+ * @file Input.c
+ * @brief Provides utility functions for safe user input handling.
+ *
  * CST8002 Programming Language Research Project
- * Practical Project Part 02 – Project Review I
+ * Practical Project Part 03 – Algorithmic manipulation of Structs
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-02-22
+ * Due Date: 2026-03-29
  *
  * Description:
- * Implements utility functions for reading user input safely.
- * Reuses the clear_input_line and trim_newline approach from PP1.
- * 
- * Sources: nothing new. Refactored from PP1's Functions.c, just moved the input-related functions here for better organization.
+ * This module contains helper functions for safely reading user input
+ * from stdin. It handles common issues such as leftover input buffer
+ * characters, newline trimming, and validation of numeric input.
+ *
+ * These functions were refactored from earlier project work to improve
+ * modularity and code organization.
+ *
+ * References:
+ * No additional references were required for this module.
  */
 
 #include "Input.h"
@@ -19,8 +27,11 @@
 #include <string.h>
 
 /**
- * Clears remaining characters from the input buffer (waiting in stdin).
- * Used to prevent invalid input from affecting subsequent reads in the menu.
+ * @brief Clears remaining characters from the input buffer.
+ *
+ * Removes any leftover characters in stdin until a newline or EOF
+ * is encountered. This prevents invalid or extra input from affecting
+ * subsequent reads.
  */
 void clear_input_line(void) {
     int c;
@@ -30,9 +41,11 @@ void clear_input_line(void) {
 }
 
 /**
- * Trims newline characters from the end of a string.
+ * @brief Removes trailing newline characters from a string.
  *
- * @param s Null-terminated string to trim.
+ * Trims '\n' and '\r' characters from the end of a null-terminated string.
+ *
+ * @param s Pointer to the string to trim.
  */
 static void trim_newline(char *s) {
     size_t n = strlen(s);
@@ -42,6 +55,15 @@ static void trim_newline(char *s) {
     }
 }
 
+/**
+ * @brief Reads an integer value from user input.
+ *
+ * Prompts the user and repeatedly attempts to read a valid integer.
+ * Invalid input is cleared and the user is prompted again.
+ *
+ * @param prompt Prompt message displayed to the user.
+ * @return int The valid integer entered by the user.
+ */
 int input_read_int(const char *prompt) {
     int value = 0;
 
@@ -61,6 +83,16 @@ int input_read_int(const char *prompt) {
     }
 }
 
+/**
+ * @brief Reads a string from user input safely.
+ *
+ * Prompts the user and reads a line of text into the provided buffer.
+ * Ensures the string is null-terminated and removes trailing newline characters.
+ *
+ * @param prompt Prompt message displayed to the user.
+ * @param out Destination buffer for the input string.
+ * @param out_size Size of the destination buffer.
+ */
 void input_read_string(const char *prompt, char *out, size_t out_size) {
     if (out == NULL || out_size == 0) {
         return;
@@ -71,7 +103,6 @@ void input_read_string(const char *prompt, char *out, size_t out_size) {
     }
 
     if (fgets(out, (int)out_size, stdin) == NULL) {
-        /* if stdin closed, return empty string */
         out[0] = '\0';
         return;
     }
@@ -79,6 +110,12 @@ void input_read_string(const char *prompt, char *out, size_t out_size) {
     trim_newline(out);
 }
 
+/**
+ * @brief Reads and discards a line of input.
+ *
+ * Consumes a small amount of input from stdin and ignores it.
+ * Useful for clearing residual input in specific cases.
+ */
 void input_read_line_discard(void) {
     char buf[8];
     (void)fgets(buf, (int)sizeof(buf), stdin);

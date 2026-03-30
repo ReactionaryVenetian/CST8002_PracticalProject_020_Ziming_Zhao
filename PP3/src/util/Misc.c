@@ -1,10 +1,10 @@
 /**
  * CST8002 Programming Language Research Project
- * Practical Project Part 02 – Project Review I
+ * Practical Project Part 03 – Algorithmic manipulation of Structs
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-02-22
+ * Due Date: 2026-03-29
  *
  * Description:
  * Implements pseudo UUID generation for filename uniqueness. Based on the time, just like a lot of RNG stuff. Not totally

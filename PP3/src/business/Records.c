@@ -3,22 +3,26 @@
  * @brief Implements business logic for managing Record objects.
  *
  * CST8002 Programming Language Research Project
- * Practical Project Part 02 – Project Review I
+ * Practical Project Part 03 – Algorithmic manipulation of Structs
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-02-22
+ * Due Date: 2026-03-29
+ *
  *
  * Description:
  * This module maintains an in-memory sequential data structure
  * and performs CRUD operations. Persistence is delegated to
  * the CsvRepository module. My name is included cause I'm vain.
  * 
- * References: 
- * [1] Stack Overflow, "Generating a random UUID in C," Stack Overflow, 2018. 
- * [Online]. Available: https://stackoverflow.com/questions/51053568/generating-a-random-uuid-in-c
- * [Accessed: Feb. 22, 2026]. Welp, I needed a UUID generator for the save function, 
- * and this was the best C implementation I could find. I adapted it to fit my needs and included it in the Misc utility module.
+ * New References: 
+ * [1]GeeksforGeeks, “qsort() Function in C,” GeeksforGeeks, Apr. 14, 2024. 
+ * https://www.geeksforgeeks.org/c/qsort-function-in-c/
+ * [Accessed: Mar. 29, 2026]. Welp, turns out there's not many built in algorithms 
+ * for in C, so I guess I'll write my own. 
+ * 
+ * [2]“C Math,” www.w3schools.com. https://www.w3schools.com/c/c_math.php
+‌ * [Accessed: Mar. 29, 2026]. Here's to me remembering simple statistical things. 
  * 
  */
 
@@ -26,6 +30,10 @@
 
 #include <stdio.h>
 #include <string.h>
+
+/** required for sqrt and qsort */
+#include <stdlib.h>
+#include <math.h>
 
 #include "../persistance/CsvRepository.h" //lol, I misspelled persistance 
 #include "../util/Misc.h"
@@ -39,6 +47,17 @@ static Record g_records[MAX_RECORDS];
 
 /** @brief Current number of records stored. */
 static size_t g_count = 0;
+
+
+/**
+ * @brief Reloads records from the dataset file into memory.
+ *
+ * Reads up to a fixed number of records from the CSV dataset and stores
+ * them in the in-memory collection.
+ *
+ * @param dataset_path Path to the CSV dataset file.
+ * @return int 0 on success, non-zero error code on failure.
+ */
 
 int records_reload(const char *dataset_path) {
     size_t loaded = 0;
@@ -57,6 +76,17 @@ int records_reload(const char *dataset_path) {
     return 0;
 }
 
+
+/**
+ * @brief Saves all records to a new CSV file with a generated UUID filename.
+ *
+ * Uses a UUID to create a unique output filename and persists all records
+ * currently stored in memory.
+ *
+ * @return int 0 on success, non-zero error code on failure.
+ */
+
+
 int records_save_to_uuid_csv(void) {
     char uuid[128];
     char path[256];
@@ -69,9 +99,25 @@ int records_save_to_uuid_csv(void) {
     return csv_save_all(path, g_records, g_count);
 }
 
+/**
+ * @brief Returns the number of records currently stored in memory.
+ *
+ * @return size_t Number of records.
+ */
+
 size_t records_count(void) {
     return g_count;
 }
+
+/**
+ * @brief Retrieves a record at the specified index.
+ *
+ * Copies the record at the given index into the provided output pointer.
+ *
+ * @param index Index of the record to retrieve.
+ * @param out_record Pointer to store the retrieved record.
+ * @return int 0 on success, error code if index or pointer is invalid.
+ */
 
 int records_get(size_t index, Record *out_record) {
     if (out_record == NULL) {
@@ -85,6 +131,15 @@ int records_get(size_t index, Record *out_record) {
     return 0;
 }
 
+/**
+ * @brief Adds a new record to the in-memory collection.
+ *
+ * Appends the given record to the end of the collection if space permits.
+ *
+ * @param record Pointer to the record to add.
+ * @return int 0 on success, error code if input is invalid or storage is full.
+ */
+
 int records_add(const Record *record) {
     if (record == NULL) {
         return 1;
@@ -97,6 +152,16 @@ int records_add(const Record *record) {
     return 0;
 }
 
+/**
+ * @brief Updates an existing record at the specified index.
+ *
+ * Replaces the record at the given index with the provided record.
+ *
+ * @param index Index of the record to update.
+ * @param record Pointer to the new record data.
+ * @return int 0 on success, error code if input is invalid.
+ */
+
 int records_update(size_t index, const Record *record) {
     if (record == NULL) {
         return 1;
@@ -108,6 +173,15 @@ int records_update(size_t index, const Record *record) {
     g_records[index] = *record;
     return 0;
 }
+
+/**
+ * @brief Deletes a record at the specified index.
+ *
+ * Removes the record and shifts all subsequent records left.
+ *
+ * @param index Index of the record to delete.
+ * @return int 0 on success, error code if index is invalid.
+ */
 
 int records_delete(size_t index) {
     if (index >= g_count) {
@@ -122,7 +196,13 @@ int records_delete(size_t index) {
     return 0;
 }
 
-/* -------- Convenience interactive functions -------- */
+/* -------- Start of interactive functions -------- */
+
+/**
+ * @brief Displays all records currently stored in memory.
+ *
+ * Outputs each record in a formatted list to the console.
+ */
 
 void records_display_all(void) {
     printf("Program by Ziming Zhao\n");
@@ -142,6 +222,12 @@ void records_display_all(void) {
     }
 }
 
+/**
+ * @brief Prompts the user to input and add a new record.
+ *
+ * Collects input from the user and inserts a new record into memory.
+ */
+
 void records_add_interactive(void) {
     Record r;
     record_init(&r);
@@ -158,6 +244,12 @@ void records_add_interactive(void) {
         printf("Failed to add record.\n");
     }
 }
+
+/**
+ * @brief Prompts the user to edit an existing record.
+ *
+ * Allows modification of a record selected by index.
+ */
 
 void records_edit_interactive(void) {
     if (g_count == 0) {
@@ -183,6 +275,12 @@ void records_edit_interactive(void) {
     printf("Record updated.\n");
 }
 
+/**
+ * @brief Prompts the user to delete a record.
+ *
+ * Removes a record selected by index from the collection.
+ */
+
 void records_delete_interactive(void) {
     if (g_count == 0) {
         printf("No records available.\n");
@@ -197,4 +295,276 @@ void records_delete_interactive(void) {
 
     records_delete((size_t)idx);
     printf("Record deleted.\n");
+}
+
+/* -------- Start of PP3 algorithm functions -------- */
+
+/**
+ * @brief Calculates the average number of adults across all records.
+ *
+ * @return double Average value, or 0.0 if no records exist.
+ */
+
+double records_average_adults(void) {
+    size_t i;
+    int sum = 0;
+
+    if (g_count == 0) {
+        return 0.0;
+    }
+
+    for (i = 0; i < g_count; i++) {
+        sum += g_records[i].total_black_oystercatcher_adults;
+    }
+
+    return (double)sum / (double)g_count;
+}
+
+/**
+ * @brief Finds the minimum number of adults across all records.
+ *
+ * @return int Minimum value, or 0 if no records exist.
+ */
+
+int records_min_adults(void) {
+    size_t i;
+    int min_value;
+
+    if (g_count == 0) {
+        return 0;
+    }
+
+    min_value = g_records[0].total_black_oystercatcher_adults;
+
+    for (i = 1; i < g_count; i++) {
+        if (g_records[i].total_black_oystercatcher_adults < min_value) {
+            min_value = g_records[i].total_black_oystercatcher_adults;
+        }
+    }
+
+    return min_value;
+}
+
+/**
+ * @brief Finds the maximum number of adults across all records.
+ *
+ * @return int Maximum value, or 0 if no records exist.
+ */
+int records_max_adults(void) {
+    size_t i;
+    int max_value;
+
+    if (g_count == 0) {
+        return 0;
+    }
+
+    max_value = g_records[0].total_black_oystercatcher_adults;
+
+    for (i = 1; i < g_count; i++) {
+        if (g_records[i].total_black_oystercatcher_adults > max_value) {
+            max_value = g_records[i].total_black_oystercatcher_adults;
+        }
+    }
+
+    return max_value;
+}
+
+/**
+ * @brief Comparator for sorting records in ascending order by adults.
+ *
+ * Used by qsort() to order records from lowest to highest.
+ *
+ * @param a Pointer to first record.
+ * @param b Pointer to second record.
+ * @return int Negative if a < b, positive if a > b, zero if equal.
+ */
+
+static int compare_adults_ascending(const void *a, const void *b) {
+    const Record *record_a = (const Record *)a;
+    const Record *record_b = (const Record *)b;
+
+    if (record_a->total_black_oystercatcher_adults < record_b->total_black_oystercatcher_adults) {
+        return -1;
+    }
+    if (record_a->total_black_oystercatcher_adults > record_b->total_black_oystercatcher_adults) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * Compares two records for descending sort by Total Black oystercatcher adults.
+ *
+ * @param a first record
+ * @param b second record
+ * @return comparison result
+ */
+
+static int compare_adults_descending(const void *a, const void *b) {
+    const Record *record_a = (const Record *)a;
+    const Record *record_b = (const Record *)b;
+
+    if (record_a->total_black_oystercatcher_adults < record_b->total_black_oystercatcher_adults) {
+        return 1;
+    }
+    if (record_a->total_black_oystercatcher_adults > record_b->total_black_oystercatcher_adults) {
+        return -1;
+    }
+    return 0;
+}
+
+/**
+ * @brief Sorts records in ascending order by Total Black oystercatcher adults.
+ *
+ * Uses qsort() with a custom comparator to order records from lowest to highest.
+ */
+void records_sort_by_adults_ascending(void) {
+    if (g_count > 1) {
+        qsort(g_records, g_count, sizeof(Record), compare_adults_ascending);
+    }
+}
+
+/**
+ * @brief Sorts records in descending order by Total Black oystercatcher adults.
+ *
+ * Uses qsort() with a custom comparator to order records from highest to lowest.
+ */
+void records_sort_by_adults_descending(void) {
+    if (g_count > 1) {
+        qsort(g_records, g_count, sizeof(Record), compare_adults_descending);
+    }
+}
+
+/**
+ * @brief Displays a histogram of adult counts.
+ *
+ * Groups records into predefined buckets and prints a visual distribution.
+ * Buckets: 0-5, 6-10, 11-15, 16-20, 21+
+ */
+ 
+void records_display_histogram(void) {
+    int buckets[5] = {0, 0, 0, 0, 0};
+    size_t i;
+    int value;
+    int j;
+
+    if (g_count == 0) {
+        printf("No records loaded.\n");
+        return;
+    }
+
+    for (i = 0; i < g_count; i++) {
+        value = g_records[i].total_black_oystercatcher_adults;
+
+        if (value <= 5) {
+            buckets[0]++;
+        } else if (value <= 10) {
+            buckets[1]++;
+        } else if (value <= 15) {
+            buckets[2]++;
+        } else if (value <= 20) {
+            buckets[3]++;
+        } else {
+            buckets[4]++;
+        }
+    }
+
+    printf("\nHistogram of Total Black oystercatcher adults\n");
+    printf("---------------------------------------------\n");
+
+    printf("0-5   : ");
+    for (j = 0; j < buckets[0]; j++) {
+        printf("*");
+    }
+    printf(" (%d)\n", buckets[0]);
+
+    printf("6-10  : ");
+    for (j = 0; j < buckets[1]; j++) {
+        printf("*");
+    }
+    printf(" (%d)\n", buckets[1]);
+
+    printf("11-15 : ");
+    for (j = 0; j < buckets[2]; j++) {
+        printf("*");
+    }
+    printf(" (%d)\n", buckets[2]);
+
+    printf("16-20 : ");
+    for (j = 0; j < buckets[3]; j++) {
+        printf("*");
+    }
+    printf(" (%d)\n", buckets[3]);
+
+    printf("21+   : ");
+    for (j = 0; j < buckets[4]; j++) {
+        printf("*");
+    }
+    printf(" (%d)\n", buckets[4]);
+}
+
+/**
+ * @brief Displays summary statistics for all records.
+ *
+ * Includes count, average, minimum, and maximum values.
+ */
+void records_display_analysis(void) {
+    if (g_count == 0) {
+        printf("No records loaded.\n");
+        return;
+    }
+
+    printf("\nRecord Analysis\n");
+    printf("---------------\n");
+    printf("Count   : %zu\n", g_count);
+    printf("Average : %.2f\n", records_average_adults());
+    printf("Min     : %d\n", records_min_adults());
+    printf("Max     : %d\n", records_max_adults());
+}
+
+/**
+ * todo
+ */
+
+void records_search_by_min_adults(int threshold) {
+    for (size_t i = 0; i < g_count; i++) {
+        if (g_records[i].total_black_oystercatcher_adults >= threshold) {
+            printf("[%zu] %s | %s | %s | %d\n",
+                i,
+                g_records[i].visit_date,
+                g_records[i].site_identification,
+                g_records[i].species,
+                g_records[i].total_black_oystercatcher_adults);
+        }
+    }
+}
+
+/**
+ * todo
+ */
+void records_count_species(const char *species) {
+    int count = 0;
+
+    for (size_t i = 0; i < g_count; i++) {
+        if (strcmp(g_records[i].species, species) == 0) {
+            count++;
+        }
+    }
+
+    printf("Species '%s' count: %d\n", species, count);
+}
+
+/**
+ * todo
+ */
+double records_stddev(void) {
+    double avg = records_average_adults();
+    double sum = 0.0;
+
+    for (size_t i = 0; i < g_count; i++) {
+        double diff = g_records[i].total_black_oystercatcher_adults - avg;
+        sum += diff * diff;
+    }
+
+    return sqrt(sum / g_count);
 }

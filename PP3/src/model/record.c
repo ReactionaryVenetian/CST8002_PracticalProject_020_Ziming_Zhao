@@ -3,11 +3,11 @@
  * @brief Implements Record initialization.
  *
  * CST8002 Programming Language Research Project
- * Practical Project Part 02 – Project Review I
+ * Practical Project Part 03 – Algorithmic manipulation of Structs
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-02-22
+ * Due Date: 2026-03-29
  * 
  * References: Nothing new here, just assigning default values to the struct fields.
  */
