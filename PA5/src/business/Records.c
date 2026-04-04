@@ -29,6 +29,7 @@
  */
 
 #include "Records.h"
+#include <plplot/plplot.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -585,4 +586,70 @@ double records_stddev(void) {
     }
 
     return sqrt(sum / g_count);
+}
+
+/**
+ * -----------------------------------------------------------------------------------
+ * Function: records_display_graphical_histogram
+ * Description:
+ *     Displays a histogram of total_black_oystercatcher_adults using PLplot.
+ *
+ * Parameters:
+ *     None
+ *
+ * Returns:
+ *     void
+ *
+ * Notes:
+ *     - Uses PLplot for rendering histogram
+ *     - Bins are automatically calculated
+ *
+ * -----------------------------------------------------------------------------------
+ */
+#include <plplot/plplot.h>
+#include <stdlib.h>
+
+void records_display_graphical_histogram(void) {
+    if (g_count == 0) {
+        printf("No data available.\n");
+        return;
+    }
+
+    // Allocate array for values
+    PLFLT *data = (PLFLT *)malloc(sizeof(PLFLT) * g_count);
+
+    if (!data) {
+        printf("Memory allocation failed.\n");
+        return;
+    }
+
+    // Copy data
+    for (size_t i = 0; i < g_count; i++) {
+        data[i] = (PLFLT)g_records[i].total_black_oystercatcher_adults;
+    }
+
+    // Determine min/max
+    PLFLT min = data[0], max = data[0];
+    for (size_t i = 1; i < g_count; i++) {
+        if (data[i] < min) min = data[i];
+        if (data[i] > max) max = data[i];
+    }
+
+    // Number of bins
+    int bins = 10;
+
+    // Initialize PLplot
+    plinit();
+
+    // Set up plotting window
+    plenv(min, max, 0, g_count, 0, 0);
+    pllab("Number of Adults", "Frequency", "Histogram of Oystercatcher Adults");
+
+    // Draw histogram
+    plhist(g_count, data, min, max, bins, 0);
+
+    // End plotting
+    plend();
+
+    free(data);
 }
