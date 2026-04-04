@@ -63,7 +63,8 @@ void menu_run(const char *dataset_path) {
         printf("11. Search by minimum adults\n");
         printf("12. Count species\n");
         printf("13. Standard deviation\n");
-        printf("14. Exit\n");
+        printf("14. Graphical histogram\n");
+        printf("15. Exit\n");
         printf("Enter choice: ");
 
         if (scanf("%d", &choice) != 1) {
@@ -132,6 +133,10 @@ void menu_run(const char *dataset_path) {
                 break;
 
             case 14:
+                records_display_graphical_histogram();
+                break;
+
+            case 15:
                 printf("Exiting program...\n");
                 break;
 

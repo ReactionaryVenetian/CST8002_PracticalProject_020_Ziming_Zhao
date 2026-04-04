@@ -1,0 +1,20 @@
+#include <plplot.h>
+#include <stdio.h>
+#include <math.h>
+
+int main() {
+    // Initialize PLplot
+    plinit();
+    
+    // Set up the plot environment: x from 0 to 1, y from 0 to 1
+    plenv(0.0, 1.0, 0.0, 1.0, 0, 0);
+    
+    // Add labels
+    pllab("X Axis", "Y Axis", "My First PLplot Test");
+    
+    // Finish
+    plend();
+    
+    printf("Plot generated! Check for a window or file.\n");
+    return 0;
+}
