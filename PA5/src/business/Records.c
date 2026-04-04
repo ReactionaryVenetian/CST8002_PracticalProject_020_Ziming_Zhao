@@ -588,68 +588,88 @@ double records_stddev(void) {
     return sqrt(sum / g_count);
 }
 
+
 /**
- * -----------------------------------------------------------------------------------
- * Function: records_display_graphical_histogram
- * Description:
- *     Displays a histogram of total_black_oystercatcher_adults using PLplot.
- *
- * Parameters:
- *     None
- *
- * Returns:
- *     void
- *
- * Notes:
- *     - Uses PLplot for rendering histogram
- *     - Bins are automatically calculated
- *
- * -----------------------------------------------------------------------------------
+ * @brief Displays a graphical histogram using PLplot.
  */
-#include <plplot/plplot.h>
-#include <stdlib.h>
-
 void records_display_graphical_histogram(void) {
+    int buckets[5] = {0, 0, 0, 0, 0};
+    size_t i;
+    int value;
+    
     if (g_count == 0) {
-        printf("No data available.\n");
+        printf("No records loaded.\n");
         return;
     }
-
-    // Allocate array for values
-    PLFLT *data = (PLFLT *)malloc(sizeof(PLFLT) * g_count);
-
-    if (!data) {
-        printf("Memory allocation failed.\n");
-        return;
+    
+    // Calculate bucket counts
+    for (i = 0; i < g_count; i++) {
+        value = g_records[i].total_black_oystercatcher_adults;
+        
+        if (value <= 5) {
+            buckets[0]++;
+        } else if (value <= 10) {
+            buckets[1]++;
+        } else if (value <= 15) {
+            buckets[2]++;
+        } else if (value <= 20) {
+            buckets[3]++;
+        } else {
+            buckets[4]++;
+        }
     }
-
-    // Copy data
-    for (size_t i = 0; i < g_count; i++) {
-        data[i] = (PLFLT)g_records[i].total_black_oystercatcher_adults;
+    
+    // Find max for scaling
+    int max_count = 0;
+    for (i = 0; i < 5; i++) {
+        if (buckets[i] > max_count) max_count = buckets[i];
     }
-
-    // Determine min/max
-    PLFLT min = data[0], max = data[0];
-    for (size_t i = 1; i < g_count; i++) {
-        if (data[i] < min) min = data[i];
-        if (data[i] > max) max = data[i];
-    }
-
-    // Number of bins
-    int bins = 10;
-
+    
+    if (max_count == 0) max_count = 1;
+    
     // Initialize PLplot
     plinit();
-
-    // Set up plotting window
-    plenv(min, max, 0, g_count, 0, 0);
-    pllab("Number of Adults", "Frequency", "Histogram of Oystercatcher Adults");
-
-    // Draw histogram
-    plhist(g_count, data, min, max, bins, 0);
-
-    // End plotting
+    
+    // Set up the plot - this creates the axes
+    plenv(0.0, 5.0, 0.0, (double)max_count * 1.2, 1, 0);
+    
+    // Label the axes
+    pllab("Bucket", "Count", "Black Oystercatcher Adults Distribution");
+    
+    // Draw bars using simple lines
+    for (i = 0; i < 5; i++) {
+        double x_left = i + 0.3;
+        double x_right = i + 0.7;
+        double y_top = (double)buckets[i];
+        
+        // Draw the bar as a filled rectangle using plfill with 4 points
+        if (buckets[i] > 0) {
+            double x[4] = {x_left, x_right, x_right, x_left};
+            double y[4] = {0.0, 0.0, y_top, y_top};
+            
+            plcol0(2);  // Red color for bars
+            plfill(4, x, y);
+            plcol0(1);  // Black for outline
+            plline(4, x, y);
+        }
+    }
+    
+    // Add labels under each bar
+    char* labels[] = {"0-5", "6-10", "11-15", "16-20", "21+"};
+    for (i = 0; i < 5; i++) {
+        plptex(i + 0.5, -0.5, 0.0, 0.5, 0.0, labels[i]);
+    }
+    
+    // Add count numbers on top of bars
+    for (i = 0; i < 5; i++) {
+        if (buckets[i] > 0) {
+            char text[10];
+            sprintf(text, "%d", buckets[i]);
+            plptex(i + 0.5, buckets[i] + 0.2, 0.0, 0.5, 0.0, text);
+        }
+    }
+    
     plend();
-
-    free(data);
+    
+    printf("\nGraphical histogram generated!\n");
 }
