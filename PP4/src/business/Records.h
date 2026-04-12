@@ -152,15 +152,12 @@ void records_sort_by_adults_descending(void);
 void records_display_histogram(void);
 
 /**
- *  depreciated, ugly, manual, and unintuitive.
-            
  * @brief Displays a graphical histogram of adult counts.
  *
  * Groups records into predefined buckets and prints a visual distribution.
  *
 void records_display_graphical_histogram(void);
 
-*/
 /**
  * @brief Displays summary statistics for all records.
  *

@@ -590,9 +590,8 @@ double records_stddev(void) {
 
 
 /**
- *  depreciated, ugly, manual, and unintuitive.            
  * @brief Displays a graphical histogram using PLplot.
- *
+ */
 void records_display_graphical_histogram(void) {
     int buckets[5] = {0, 0, 0, 0, 0};
     size_t i;
@@ -673,4 +672,4 @@ void records_display_graphical_histogram(void) {
     plend();
     
     printf("\nGraphical histogram generated!\n");
-}*/
+}

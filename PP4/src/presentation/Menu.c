@@ -132,10 +132,9 @@ void menu_run(const char *dataset_path) {
                 printf("Standard deviation: %.2f\n", records_stddev());
                 break;
 
-            /* depreciated, ugly, manual, and unintuitive.
             case 14:
                 records_display_graphical_histogram();
-                break;*/
+                break;
 
             case 15:
                 printf("Exiting program...\n");
