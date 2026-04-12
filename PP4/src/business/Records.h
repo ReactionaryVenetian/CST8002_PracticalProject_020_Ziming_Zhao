@@ -3,11 +3,11 @@
  * @brief Business layer for managing in-memory Record objects.
  *
  * CST8002 Programming Language Research Project
- * Practical Project Part 03 – Algorithmic manipulation of Structs
+ * Practical Project Part 04 – multi-column sorting and additional features
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-03-29
+ * Due Date: 2026-04-12
  *
  * Description:
  * This module owns the sequential in-memory data structure
@@ -156,6 +156,7 @@ void records_display_histogram(void);
  *
  * Groups records into predefined buckets and prints a visual distribution.
  *
+ */
 void records_display_graphical_histogram(void);
 
 /**
@@ -192,4 +193,42 @@ void records_count_species(const char *species);
  */
 double records_stddev(void);
 
+
+/**
+ * @brief Sort keys available for multi-column sorting.
+ */
+typedef enum {
+    SORT_BY_VISIT_DATE = 1,
+    SORT_BY_SITE_IDENTIFICATION,
+    SORT_BY_SPECIES,
+    SORT_BY_TOTAL_BLACK_OYSTERCATCHER_ADULTS
+} SortKey;
+
+/**
+ * @brief Sort order options.
+ */
+typedef enum {
+    SORT_ASC = 1,
+    SORT_DESC
+} SortOrder;
+
+/**
+ * @brief Sorts records using up to three columns.
+ *
+ * The first key is the primary sort key. If two records are equal on the
+ * first key, the second key is used. If still equal, the third key is used.
+ *
+ * @param primary_key First sort key.
+ * @param secondary_key Second sort key.
+ * @param tertiary_key Third sort key.
+ * @param order Ascending or descending.
+ */
+void records_sort_multiple_columns(
+    SortKey primary_key,
+    SortKey secondary_key,
+    SortKey tertiary_key,
+    SortOrder order
+);
+
 #endif /* RECORDS_H */
+

@@ -3,11 +3,11 @@
  * @brief Implements business logic for managing Record objects.
  *
  * CST8002 Programming Language Research Project
- * Practical Project Part 03 – Algorithmic manipulation of Structs
+ * Practical Project Part 04 – multi-column sorting and additional features
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-03-29
+ * Due Date: 2026-04-12
  *
  *
  * Description:
@@ -17,13 +17,7 @@
  * included cause I'm vain.
  * 
  * New References: 
- * [1]GeeksforGeeks, “qsort() Function in C,” GeeksforGeeks, Apr. 14, 2024. 
- * https://www.geeksforgeeks.org/c/qsort-function-in-c/
- * [Accessed: Mar. 29, 2026]. Welp, turns out there's not many built in algorithms 
- * for in C, so I guess I'll write my own. 
- * 
- * [2]w3schools “C Math,” www.w3schools.com, unknown update.
- *  https://www.w3schools.com/c/c_math.php
+ * None really, just trail and error
 ‌ * [Accessed: Mar. 29, 2026]. Here's to me remembering simple statistical things. 
  * 
  */
@@ -38,7 +32,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../persistance/CsvRepository.h" //lol, I misspelled persistance 
+#include "../persistence/CsvRepository.h" //lol, I misspelled persistance 
 #include "../util/Misc.h"
 #include "../util/Input.h"
 
@@ -638,7 +632,7 @@ void records_display_graphical_histogram(void) {
     
     // Draw bars using simple lines
     for (i = 0; i < 5; i++) {
-        double x_left = i + 0.3;
+        double x_left = i + 4.7; // longer-columns, the last one was really ugly and too compacted.
         double x_right = i + 0.7;
         double y_top = (double)buckets[i];
         
@@ -672,4 +666,135 @@ void records_display_graphical_histogram(void) {
     plend();
     
     printf("\nGraphical histogram generated!\n");
+}
+
+/**
+ * @brief Holds the current sort configuration for qsort comparator use.
+ */
+static SortKey g_primary_key;
+static SortKey g_secondary_key;
+static SortKey g_tertiary_key;
+static SortOrder g_sort_order;
+
+/**
+ * @brief Compares two string values safely.
+ *
+ * @param left First string.
+ * @param right Second string.
+ * @return Negative, zero, or positive strcmp-style result.
+ */
+static int compare_strings(const char *left, const char *right) {
+    if (left == NULL && right == NULL) {
+        return 0;
+    }
+    if (left == NULL) {
+        return -1;
+    }
+    if (right == NULL) {
+        return 1;
+    }
+    return strcmp(left, right);
+}
+
+/**
+ * @brief Compares two integer values.
+ *
+ * @param left First integer.
+ * @param right Second integer.
+ * @return Negative if left < right, positive if left > right, otherwise 0.
+ */
+static int compare_ints(int left, int right) {
+    if (left < right) {
+        return -1;
+    }
+    if (left > right) {
+        return 1;
+    }
+    return 0;
+}
+
+/**
+ * @brief Compares two records using one requested sort key.
+ *
+ * @param left First record.
+ * @param right Second record.
+ * @param key Sort key to use.
+ * @return Comparison result.
+ */
+static int compare_by_key(const Record *left, const Record *right, SortKey key) {
+    switch (key) {
+        case SORT_BY_VISIT_DATE:
+            return compare_strings(left->visit_date, right->visit_date);
+
+        case SORT_BY_SITE_IDENTIFICATION:
+            return compare_strings(left->site_identification, right->site_identification);
+
+        case SORT_BY_SPECIES:
+            return compare_strings(left->species, right->species);
+
+        case SORT_BY_TOTAL_BLACK_OYSTERCATCHER_ADULTS:
+            return compare_ints(
+                left->total_black_oystercatcher_adults,
+                right->total_black_oystercatcher_adults
+            );
+
+        default:
+            return 0;
+    }
+}
+
+/**
+ * @brief qsort comparator for multi-column record sorting.
+ *
+ * @param a Pointer to first record.
+ * @param b Pointer to second record.
+ * @return Comparison result after applying configured keys and order.
+ */
+static int compare_records_multi(const void *a, const void *b) {
+    const Record *left = (const Record *)a;
+    const Record *right = (const Record *)b;
+    int result = 0;
+
+    result = compare_by_key(left, right, g_primary_key);
+    if (result == 0) {
+        result = compare_by_key(left, right, g_secondary_key);
+    }
+    if (result == 0) {
+        result = compare_by_key(left, right, g_tertiary_key);
+    }
+
+    if (g_sort_order == SORT_DESC) {
+        result = -result;
+    }
+
+    return result;
+}
+
+/**
+ * @brief Sorts all in-memory records using multiple columns.
+ *
+ * @param primary_key First sort key.
+ * @param secondary_key Second sort key.
+ * @param tertiary_key Third sort key.
+ * @param order Ascending or descending.
+ */
+void records_sort_multiple_columns(
+    SortKey primary_key,
+    SortKey secondary_key,
+    SortKey tertiary_key,
+    SortOrder order
+) {
+    if (g_records == NULL || g_count == 0) {
+        printf("No records loaded.\n");
+        return;
+    }
+
+    g_primary_key = primary_key;
+    g_secondary_key = secondary_key;
+    g_tertiary_key = tertiary_key;
+    g_sort_order = order;
+
+    qsort(g_records, g_count, sizeof(Record), compare_records_multi);
+
+    printf("Records sorted successfully using multiple columns.\n");
 }

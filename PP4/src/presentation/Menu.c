@@ -1,16 +1,16 @@
 /**
  * CST8002 Programming Language Research Project
- * Practical Project Part 03 – Algorithmic manipulation of Structs
+ * Practical Project Part 04 – multi-column sorting and additional features
  *
  * Author: Ziming Zhao 041166304
  * Professor: Stanley Pieda
- * Due Date: 2026-03-29
+ * Due Date: 2026-04-12
  *
  * Description:
  * Presentation layer menu. Handles user interaction only
  * and delegates logic to the Business layer.
  * 
- * References: Nothing too new here, just references new stuff in business/Records.h.
+ * References: Added secondary menu for multi-column sort, nothing conceptually mew-just more complicated.
  */
 
 
@@ -44,6 +44,7 @@
  */
 
 void menu_run(const char *dataset_path) {
+
     int choice = 0;
 
     do {
@@ -64,7 +65,8 @@ void menu_run(const char *dataset_path) {
         printf("12. Count species\n");
         printf("13. Standard deviation\n");
         printf("14. Graphical histogram\n");
-        printf("15. Exit\n");
+        printf("15. Sort by multiple columns\n");
+        printf("16. Exit\n");
         printf("Enter choice: ");
 
         if (scanf("%d", &choice) != 1) {
@@ -137,6 +139,10 @@ void menu_run(const char *dataset_path) {
                 break;
 
             case 15:
+            menu_sort_multiple_columns();
+            break;
+
+            case 16:
                 printf("Exiting program...\n");
                 break;
 
@@ -145,4 +151,53 @@ void menu_run(const char *dataset_path) {
         }
 
     } while (choice != 14);
+}
+
+
+/**
+ * @brief Displays the available sort keys (sub-menu of case 15).
+ */
+static void display_sort_key_options(void) {
+    printf("Choose a sort key:\n");
+    printf("1. Visit date\n");
+    printf("2. Site identification\n");
+    printf("3. Species\n");
+    printf("4. Total Black oystercatcher adults\n");
+}
+
+/**
+ * @brief Runs the menu for multi-column sorting.
+ */
+void menu_sort_multiple_columns(void) {
+    int primary = 0;
+    int secondary = 0;
+    int tertiary = 0;
+    int order = 0;
+
+    printf("\n=== Multi-Column Sort ===\n");
+
+    display_sort_key_options();
+    printf("Enter primary sort key: ");
+    scanf("%d", &primary);
+
+    display_sort_key_options();
+    printf("Enter secondary sort key: ");
+    scanf("%d", &secondary);
+
+    display_sort_key_options();
+    printf("Enter tertiary sort key: ");
+    scanf("%d", &tertiary);
+
+    printf("Choose order:\n");
+    printf("1. Ascending\n");
+    printf("2. Descending\n");
+    printf("Enter order: ");
+    scanf("%d", &order);
+
+    records_sort_multiple_columns(
+        (SortKey)primary,
+        (SortKey)secondary,
+        (SortKey)tertiary,
+        (SortOrder)order
+    );
 }
